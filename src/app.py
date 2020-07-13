@@ -7,6 +7,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Se importa la libreria de bson
 # Bson es el tipo de dato que ocupa mongo para pode almacenar datos
 from bson import json_util
+# Importo ObjectId para poder manejar el id de un objeto en BSON
+from bson.objectid import ObjectId
+
+
 # Creamos una instancia del Framework Flask llamado "app"
 app = Flask(__name__)
 
@@ -23,7 +27,8 @@ mongo = PyMongo(app)
 
 
 @app.route('/users', methods=['POST'])
-def create_user():  # Funcion de la ruta
+def create_user():
+    # Funcion de la ruta
     # variables que contienen los datos que se le enviaran al backend
     username = request.json['username']
     password = request.json['password']
@@ -58,9 +63,17 @@ def get_users():
     users = mongo.db.users.find()
     response = json_util.dumps(users)
     return Response(response, mimetype='application/json')
+
+
+# Ruta para obtener solo 1 usuario
+@app.route('/users/<id>', methods=['GET'])
+def get_user(id):
+    user = mongo.db.users.find_one({'_id': ObjectId(id)})
+    response = json_util.dumps(user)
+    return Response(response, mimetype="application/json")
+
+
 # Manejador de error
-
-
 @app.errorhandler(404)
 def notfound(error=None):
     # La variable response contiene el mensaje de error
